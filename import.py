@@ -1,5 +1,6 @@
 from pandas import read_csv
 from pandas import merge
+import locale
 
 btc = read_csv('./data/used/bitcoin_price.csv')
 dash = read_csv('./data/used/dash_price.csv', header=0)
@@ -37,3 +38,24 @@ merged = reduce(lambda left,right: merge(left,right,on='Date'), coin_list)
 
 print('variable "merged" contains 409 days worth of market info for seven coins.')
 
+
+# Some of the columns have a number with commas... remove them.
+def remove_commas(column):
+    newcolumn = []
+    for i in range(len(column)):
+        newcolumn.append(locale.atoi(column[i]))
+    return newcolumn
+
+# def remove_commas(column):
+#     for i in range(len(column)):
+#         column[i] = locale.atoi(column[i])
+
+for column in merged.columns:
+    if 'Volume' in column:
+        merged[column] = remove_commas(merged[column])
+    if 'Market' in column:
+        merged[column] = remove_commas(merged[column])
+    else:
+        print('this column works')
+
+print(merged.head(3))
