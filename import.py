@@ -13,6 +13,31 @@ ripple = read_csv('./data/used/ripple_price.csv', header=0)
 coin_list = [btc, dash, eth, ethc, ltc, monero, ripple]
 coin_names = ['btc', 'dash', 'eth', 'ethc', 'ltc', 'monero', 'ripple']
 
+def lag(variable, window):
+    df1 = DataFrame(variable)
+    for i in range(window):
+        j = window - i
+        df1 = concat([df1, variable.shift(j)], axis=1)
+    columns = [variable.name]
+    for i in range(window):
+        j = window - i
+        columns.append('t - %d' % j)
+    df1.columns = columns
+    return df1.iloc[window:]
+
+def persist(x):
+    xy = lag(x, 1)
+    col = xy.columns
+    y_hat = xy[xy.columns[0]]
+    y = xy[xy.columns[1]]
+    error = []
+    for i in range(len(xy)):
+        delta = (y_hat[i+1] - y[i+1])
+        error.append(delta)
+    mae = sum(abs(err) for err in error)/len(error)
+    mse = sum(err*err for err in error)/len(error)
+    return (mae, mse)
+
 # Add coin name to beginning of columns, so that when coin data is merged, information remains easily identified by coin.
 for coin in range(len(coin_list)):
     columns = []
@@ -40,22 +65,21 @@ print('variable "merged" contains 409 days worth of market info for seven coins.
 
 
 # Some of the columns have a number with commas... remove them.
-def remove_commas(column):
-    newcolumn = []
+def no_comma(column):
+    new = []
     for i in range(len(column)):
-        newcolumn.append(locale.atoi(column[i]))
-    return newcolumn
+        new.append(column[i].replace(',', ''))
+    return new
 
-# def remove_commas(column):
-#     for i in range(len(column)):
-#         column[i] = locale.atoi(column[i])
 
 for column in merged.columns:
     if 'Volume' in column:
-        merged[column] = remove_commas(merged[column])
+        merged[column] = no_comma(merged[column])
     if 'Market' in column:
-        merged[column] = remove_commas(merged[column])
+        merged[column] = no_comma(merged[column])
     else:
         print('this column works')
+
+
 
 print(merged.head(3))
