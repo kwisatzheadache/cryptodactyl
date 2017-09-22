@@ -1,5 +1,7 @@
 from pandas import read_csv
 from pandas import merge
+from pandas import DataFrame
+from pandas import concat
 import locale
 
 btc = read_csv('./data/used/bitcoin_price.csv')
@@ -21,7 +23,7 @@ def lag(variable, window):
     columns = [variable.name]
     for i in range(window):
         j = window - i
-        columns.append('t - %d' % j)
+        columns.append(variable.name + ' t - %d' % j)
     df1.columns = columns
     return df1.iloc[window:]
 
@@ -78,8 +80,6 @@ for column in merged.columns:
     if 'Market' in column:
         merged[column] = no_comma(merged[column])
     else:
-        print('this column works')
+        continue
 
-
-
-print(merged.head(3))
+print('Merged contains data for 7 coins')
