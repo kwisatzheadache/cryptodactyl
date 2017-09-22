@@ -83,3 +83,13 @@ for column in merged.columns:
         continue
 
 print('Merged contains data for 7 coins')
+
+for i in merged.columns:
+    lagged = lag(merged[i], 7)
+    merged[lagged.columns] = lagged
+
+input = merged.iloc[7:]
+
+print(input.head(10))
+print('Merged contains data for 7 coins')
+print('input contains same data, but with a lag7 shift')
