@@ -67,3 +67,10 @@ model = LogisticRegression()
 model.fit(X_train, Y_train)
 predictions = model.predict(X_test)
 print(accuracy_score(Y_test, predictions))
+
+# adding lag to all coins
+for i in date:
+    cols = []
+    for j in range(8):
+        cols.append(i+str(j))
+    df[cols] = lag(merged[i], 7)
