@@ -22,7 +22,7 @@ Increase frequency of sampling to hourly.
 ## Tests
 
 `model_testing.py` runs a series of coin indices through various models and outputs information for any model which predicts accuracy greater than 60%.
-However, most of these have a rather unacceptable confidence intervale, though I will work to improve this by increasing sampling rates.
+However, most of these have a rather unacceptable confidence intervale, though I will work to improve this by increasing sampling rates. I suspect much of the variance is simply due to the volatility of markets.
 
 ## Contributors
 

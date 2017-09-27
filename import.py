@@ -2,7 +2,6 @@ from pandas import read_csv
 from pandas import merge
 from pandas import DataFrame
 from pandas import concat
-import locale
 
 btc = read_csv('./data/used/bitcoin_price.csv')
 dash = read_csv('./data/used/dash_price.csv', header=0)
@@ -63,9 +62,6 @@ for i in range(len(coin_list)):
 # Combine coins into one large df
 merged = reduce(lambda left,right: merge(left,right,on='Date'), coin_list)
 
-print('variable "merged" contains 409 days worth of market info for seven coins.')
-
-
 # Some of the columns have a number with commas... remove them.
 def no_comma(column):
     new = []
@@ -81,13 +77,5 @@ for column in merged.columns:
         merged[column] = no_comma(merged[column])
     else:
         continue
-
-print('Merged contains data for 7 coins')
-
-
-# for i in merged.columns:
-#     lagged = lag(merged[i], 7)
-#     merged[lagged.columns] = lagged
-
 
 print('Merged contains data for 7 coins')
