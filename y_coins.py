@@ -25,3 +25,6 @@ for i in merged.columns:
 y_df = DataFrame()
 for i in y_list:
     y_df[i] = make_y(merged, i)
+
+
+print 'y_df contains predicted increases for coins'

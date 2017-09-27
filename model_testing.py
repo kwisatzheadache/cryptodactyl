@@ -48,29 +48,26 @@ results = []
 names = []
 scoring = 'accuracy'
 
+# This runs model tests on all the coins. If mean accuracy is greater than .6, it prints the model and coin. 
 for name, model in models:
     kfold = KFold(n_splits=10, random_state=7)
-    cv_results = cross_val_score(model, X, Y, cv=kfold, scoring=scoring)
-    results.append(cv_results)
-    names.append(name)
-    msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
-    print(msg)
+    for coin_predicted in y_df.columns:
+        cv_results = cross_val_score(model, X, y_df[coin_predicted], cv=kfold, scoring=scoring)
+        results.append(cv_results)
+        names.append(name)
+        msg = "Accuracy of %s for %s: %f (+/- %0.2f)" % (name, coin_predicted, cv_results.mean(), cv_results.std() * 2)
+        if cv_results.mean() > .6:
+            print(msg)
 
-fig = pyplot.figure()
-fig.suptitle('algorithm comparison')
-ax = fig.add_subplot(111)
-pyplot.boxplot(results)
-ax.set_xticklabels(names)
-pyplot.show
 
-model = LogisticRegression()
-model.fit(X_train, Y_train)
-predictions = model.predict(X_test)
-print(accuracy_score(Y_test, predictions))
+# model = LogisticRegression()
+# model.fit(X_train, Y_train)
+# predictions = model.predict(X_test)
+# print(accuracy_score(Y_test, predictions))
 
-# adding lag to all coins
-for i in date:
-    cols = []
-    for j in range(8):
-        cols.append(i+str(j))
-    df[cols] = lag(merged[i], 7)
+# # adding lag to all coins
+# for i in date:
+#     cols = []
+#     for j in range(8):
+#         cols.append(i+str(j))
+#     df[cols] = lag(merged[i], 7)
