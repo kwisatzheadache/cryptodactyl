@@ -18,26 +18,12 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVC
 
-btc_up = []
-lookback = lag(merged['btcClose'], 1)
+execfile('import.py')
+execfile('y_coins.py')
 
-for i in range(len(lookback)):
-    if lookback['btcClose'].iloc[i] < lookback['btcClose t - 1'].iloc[i]:
-        btc_up.append(0)
-    else:
-        btc_up.append(1)
-
-        test_size = .33
-seed = 7
 cols = array(merged.columns)[1:]
-Y_partial = array(btc_up[:300])
-X_partial = array(merged[cols][:300])
-
-Y = array(btc_up)
 X = array(merged[cols][1:])
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
-
-# Check out the GaussianNB stuff for classification predictions, and page 84 of brownlee ml learning
+#Y is selected from the columns of y_df - a df with derived in y_coins.py
 
 models = []
 models.append(('LR', LogisticRegression()))
@@ -60,14 +46,3 @@ for name, model in models:
             print(msg)
 
 
-# model = LogisticRegression()
-# model.fit(X_train, Y_train)
-# predictions = model.predict(X_test)
-# print(accuracy_score(Y_test, predictions))
-
-# # adding lag to all coins
-# for i in date:
-#     cols = []
-#     for j in range(8):
-#         cols.append(i+str(j))
-#     df[cols] = lag(merged[i], 7)

@@ -18,6 +18,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVC
 
+# This predicts the price increase or decrease of btcOpen, in the form of a 1 or 0, respectively.
+
 btc_up = []
 lookback = lag(merged['btcClose'], 1)
 

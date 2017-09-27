@@ -89,8 +89,5 @@ print('Merged contains data for 7 coins')
 #     lagged = lag(merged[i], 7)
 #     merged[lagged.columns] = lagged
 
-# readylist = merged.iloc[7:]
 
-print(readylist.head(10))
 print('Merged contains data for 7 coins')
-print('readylist contains same data, but with a lag7 shift')
