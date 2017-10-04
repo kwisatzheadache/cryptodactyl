@@ -5,9 +5,7 @@
 # Predictor of which coin has greatest rise/fall.
 from matplotlib import pyplot
 
-execfile('import.py')
-
-# btc:ltc ratio
+# coin ratios
 
 btc_ltc = []
 for i in range(len(merged)):
@@ -17,12 +15,27 @@ btc_eth = []
 for i in range(len(merged)):
     btc_eth.append(merged['btcClose'][i]/merged['ethClose'][i])
 
-eth_ltc = []
+btc_mon = []
 for i in range(len(merged)):
-    eth_ltc.append(merged['ethClose'][i]/merged['ltcClose'][i])
+    mon_btc.append(merged['btcClose'][i]/merged['moneroClose'][i])
+
+ltc_eth = []
+for i in range(len(merged)):
+    eth_ltc.append(merged['ltcClose'][i]/merged['ethClose'][i])
+
+ltc_mon = []
+for i in range(len(merged)):
+    mon_eth.append(merged['ltcClose'][i]/merged['moneroClose'][i])
+
+eth_mon = []
+for i in range(len(merged)):
+    mon_ltc.append(merged['ethClose'][i]/merged['moneroClose'][i])
 
 
-pyplot.plot(btc_ltc)
-pyplot.plot(eth_ltc)
-pyplot.plot(btc_eth)
-pyplot.show()
+# pyplot.plot(btc_ltc)
+# pyplot.plot(btc_eth)
+# pyplot.plot(btc_mon)
+# pyplot.plot(ltc_eth)
+# pyplot.plot(ltc_mon)
+# pyplot.plot(eth_mon)
+# pyplot.show()
