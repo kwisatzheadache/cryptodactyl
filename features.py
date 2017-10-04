@@ -17,19 +17,19 @@ for i in range(len(merged)):
 
 btc_mon = []
 for i in range(len(merged)):
-    mon_btc.append(merged['btcClose'][i]/merged['moneroClose'][i])
+    btc_mon.append(merged['btcClose'][i]/merged['moneroClose'][i])
 
 ltc_eth = []
 for i in range(len(merged)):
-    eth_ltc.append(merged['ltcClose'][i]/merged['ethClose'][i])
+    ltc_eth.append(merged['ltcClose'][i]/merged['ethClose'][i])
 
 ltc_mon = []
 for i in range(len(merged)):
-    mon_eth.append(merged['ltcClose'][i]/merged['moneroClose'][i])
+    ltc_mon.append(merged['ltcClose'][i]/merged['moneroClose'][i])
 
 eth_mon = []
 for i in range(len(merged)):
-    mon_ltc.append(merged['ethClose'][i]/merged['moneroClose'][i])
+    eth_mon.append(merged['ethClose'][i]/merged['moneroClose'][i])
 
 
 # pyplot.plot(btc_ltc)

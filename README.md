@@ -13,7 +13,6 @@ Why do we do anything in life?
 
 ## Next Steps
 
-Normalize Data to provide nn with less variability.
 Automate collection of coin data.
 Analyze other coins.
 Address seasonality and general trend of data.
