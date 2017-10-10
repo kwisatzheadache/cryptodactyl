@@ -1,4 +1,5 @@
 from sklearn.model_selection import train_test_split
+from pandas import DataFrame
 from numpy import array
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
@@ -11,7 +12,7 @@ from sklearn.svm import SVC
 execfile('import.py')
 execfile('y_coins.py')
 
-with_ratios = merged
+with_ratios = DataFrame(merged)
 ratios = [('btc_ltc', btc_ltc), ('btc_eth', btc_eth), ('btc_mon', btc_mon), ('ltc_eth', ltc_eth), ('ltc_mon', ltc_mon), ('eth_mon', eth_mon)]
 for name, data in ratios:
     with_ratios[name] = data
@@ -40,7 +41,4 @@ for name, model in models:
         msg = "Accuracy of %s for %s: %f (+/- %0.2f)" % (name, coin_predicted, cv_results.mean(), cv_results.std() * 2)
         if cv_results.mean() > .6:
             print(msg)
-
-
-# Strangely enough, the merged df contains columns from with_ratios. Not sure why or how that works, will have to look into it.
 
