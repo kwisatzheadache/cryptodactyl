@@ -11,6 +11,10 @@ Development of neural nets to predict market volatility in cryptocurrencies.
 
 Why do we do anything in life?
 
+## Notes
+
+Current dataset is in reverse chronological order. Thinking about reversing it so that day one is in the past, rather than the most recent day...
+
 ## Next Steps
 
 Automate collection of coin data.

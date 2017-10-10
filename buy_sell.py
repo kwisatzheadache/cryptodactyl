@@ -49,6 +49,8 @@ def convert(coin1, amount1, coin2, day):
     converted = amount1 * ratio
     return converted
 
+def predict_ratios(day):
+
 # Ratio analysis will look like this: BTC_LTC = 1
 # Ratios will be an array?
 # [['BTC_LTC', 1]
