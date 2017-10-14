@@ -30,18 +30,7 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 import numpy
 import pandas
 
-
-btc = read_csv('./data/used/bitcoin_price.csv')
-dash = read_csv('./data/used/dash_price.csv', header=0)
-eth = read_csv('./data/used/ethereum_price.csv', header=0)
-ethc = read_csv('./data/used/ethereum_classic_price.csv', header=0)
-ltc = read_csv('./data/used/litecoin_price.csv', header=0)
-monero = read_csv('./data/used/monero_price.csv', header=0)
-ripple = read_csv('./data/used/ripple_price.csv', header=0)
-
-coin_list = [btc, dash, eth, ethc, ltc, monero, ripple]
-coin_names = ['btc', 'dash', 'eth', 'ethc', 'ltc', 'monero', 'ripple']
-
+# ----------------- BEGIN FUNCTIONS ---------------# 
 def lag(variable, window):
     df1 = DataFrame(variable)
     for i in range(window):
@@ -67,6 +56,47 @@ def persist(x):
     mse = sum(err*err for err in error)/len(error)
     return (mae, mse)
 
+def no_comma(column):
+    new = []
+    for i in range(len(column)):
+        new.append(column[i].replace(',', ''))
+    return new
+
+def baseline():
+    model = Sequential()
+    model.add(Dense(60, input_dim=42, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(1, kernel_initializer='normal', activation='sigmoid'))
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return model
+
+def return_prices(day):
+    btc = merged.loc[day, 'btcClose']
+    ltc = merged.loc[day, 'ltcClose']
+    eth = merged.loc[day, 'ethClose']
+    mon = merged.loc[day, 'moneroClose']
+    return {
+        'btc': btc, 'ltc': ltc, 'eth': eth, 'mon': mon
+    }
+
+# Receive purchase call and return coin amount
+def purchase(coin, dollars, day):
+    daily_prices = return_prices(day)
+    amount = dollars * (1 / daily_prices[coin])
+    return amount
+
+# ------------------- END FUNCTIONS -------------------#
+
+# -------- BEGIN IMPORTING AND ARRANGING DATA ---------#
+btc = read_csv('./data/used/bitcoin_price.csv')
+dash = read_csv('./data/used/dash_price.csv', header=0)
+eth = read_csv('./data/used/ethereum_price.csv', header=0)
+ethc = read_csv('./data/used/ethereum_classic_price.csv', header=0)
+ltc = read_csv('./data/used/litecoin_price.csv', header=0)
+monero = read_csv('./data/used/monero_price.csv', header=0)
+ripple = read_csv('./data/used/ripple_price.csv', header=0)
+
+coin_list = [btc, dash, eth, ethc, ltc, monero, ripple]
+coin_names = ['btc', 'dash', 'eth', 'ethc', 'ltc', 'monero', 'ripple']
 # Add coin name to beginning of columns, so that when coin data is merged, information remains easily identified by coin.
 for coin in range(len(coin_list)):
     columns = []
@@ -95,11 +125,6 @@ cols.insert(0, cols.pop(cols.index('counter')))
 merged = merged[cols]
 
 # Some of the columns have a number with commas... remove them.
-def no_comma(column):
-    new = []
-    for i in range(len(column)):
-        new.append(column[i].replace(',', ''))
-    return new
 
 
 for column in merged.columns:
@@ -148,13 +173,6 @@ for i in range(len(lookback)):
         btc_up.append(0)
     else:
         btc_up.append(1)
-
-def baseline():
-    model = Sequential()
-    model.add(Dense(60, input_dim=42, kernel_initializer='normal', activation='relu'))
-    model.add(Dense(1, kernel_initializer='normal', activation='sigmoid'))
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    return model
 
 estimator = KerasClassifier(build_fn=baseline, nb_epoch=100, batch_size=5, verbose=0)
 kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
@@ -247,21 +265,6 @@ execfile('import.py')
 # However, coins must be purchased, not just held as dollars......
 # At purchase, grab the price of each coin at close, then convert dollars to coins.
 # Daily, grab coin prices so that holdings can be converted at current rates.
-
-def return_prices(day):
-    btc = merged.loc[day, 'btcClose']
-    ltc = merged.loc[day, 'ltcClose']
-    eth = merged.loc[day, 'ethClose']
-    mon = merged.loc[day, 'moneroClose']
-    return {
-        'btc': btc, 'ltc': ltc, 'eth': eth, 'mon': mon
-    }
-
-# Receive purchase call and return coin amount
-def purchase(coin, dollars, day):
-    daily_prices = return_prices(day)
-    amount = dollars * (1 / daily_prices[coin])
-    return amount
 
 # At the end of the trading cycle (100 days), figure the change in value without trades.
 # $250 in each coin from start date to finish.
