@@ -61,6 +61,10 @@ for i in range(len(coin_list)):
 
 # Combine coins into one large df
 merged = reduce(lambda left,right: merge(left,right,on='Date'), coin_list)
+merged['counter'] = range(len(merged))
+cols = list(merged.columns)
+cols.insert(0, cols.pop(cols.index('counter')))
+merged = merged[cols]
 
 # Some of the columns have a number with commas... remove them.
 def no_comma(column):
