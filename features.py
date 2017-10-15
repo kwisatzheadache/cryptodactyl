@@ -1,5 +1,5 @@
-# ------------- BEGIN CREATING FEATURES -------------#
 
+# ------------- BEGIN CREATING FEATURES -------------#
 
 with_ratios = DataFrame(merged)
 ratios = [('btc_ltc', btc_ltc), ('btc_eth', btc_eth), ('btc_mon', btc_mon), ('ltc_eth', ltc_eth), ('ltc_mon', ltc_mon), ('eth_mon', eth_mon)]
