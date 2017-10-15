@@ -232,19 +232,13 @@ for i in range(len(merged)):
 
 # ------------- END MAKING Y-SET ------------------- #
 
-# --------------- BEGIN DATA ORGANIZATION ---------- #
-
+# ----------------BEGIN MODEL TESTING -------------- #
 cols = array(merged.columns)[1:]
 X = array(merged[cols][1:])
 Y = array(btc_up)
 X_partial = array(merged[:][:300])
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
 Y_partial = array(btc_up[:300])
-
-# ----------------- END DATA ORGANIZATION ---------- #
-
-# ----------------BEGIN MODEL TESTING -------------- #
-
 
 
 # Alternate model - 32-32-1, does not perform as well.

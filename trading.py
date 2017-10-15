@@ -1,4 +1,5 @@
-execfile('import.py')
+
+# --------------------- BEGIN TRADING -------------- #
 
 # Start with $1000 in four coins = monero, bitcoin, litecoin, and ethereum.
 # Based on the prediction of the ratio analyses, trade between the four coins.
@@ -18,21 +19,6 @@ execfile('import.py')
 # At purchase, grab the price of each coin at close, then convert dollars to coins.
 # Daily, grab coin prices so that holdings can be converted at current rates.
 
-def return_prices(day):
-    btc = merged.loc[day, 'btcClose']
-    ltc = merged.loc[day, 'ltcClose']
-    eth = merged.loc[day, 'ethClose']
-    mon = merged.loc[day, 'moneroClose']
-    return {
-        'btc': btc, 'ltc': ltc, 'eth': eth, 'mon': mon
-    }
-
-# Receive purchase call and return coin amount
-def purchase(coin, dollars, day):
-    daily_prices = return_prices(day)
-    amount = dollars * (1 / daily_prices[coin])
-    return amount
-
 # At the end of the trading cycle (100 days), figure the change in value without trades.
 # $250 in each coin from start date to finish.
 # Base all starting values on open or close... arbitrarily lets pick close.
@@ -41,15 +27,6 @@ BTC = purchase('btc', 250, 1)
 ETH = purchase('eth', 250, 1)
 LTC = purchase('ltc', 250, 1)
 MON = purchase('mon', 250, 1)
-
-# Converting between coins
-def convert(coin1, amount1, coin2, day):
-    daily_prices = return_prices(day)
-    ratio = daily_prices[coin1]/daily_prices[coin2]
-    converted = amount1 * ratio
-    return converted
-
-def predict_ratios(day):
 
 # Ratio analysis will look like this: BTC_LTC = 1
 # Ratios will be an array?
@@ -64,4 +41,5 @@ def predict_ratios(day):
 # holdings = [BTC, ETH, LTC, MON]
 # def trade(ratios, monies):
 
+# ----------------- END TRADING ------------------ #
 
