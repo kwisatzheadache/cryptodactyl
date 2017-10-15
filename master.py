@@ -93,6 +93,15 @@ def purchase(coin, dollars, day):
     amount = dollars * (1 / daily_prices[coin])
     return amount
 
+# Converting between coins
+def convert(coin1, amount1, coin2, day):
+    daily_prices = return_prices(day)
+    ratio = daily_prices[coin1]/daily_prices[coin2]
+    converted = amount1 * ratio
+    return converted
+
+def predict_ratios(day):
+
 # ------------------- END FUNCTIONS -------------------#
 
 # -------- BEGIN IMPORTING AND ARRANGING DATA ---------#
@@ -223,10 +232,20 @@ for i in range(len(merged)):
 
 # ------------- END MAKING Y-SET ------------------- #
 
+# --------------- BEGIN DATA ORGANIZATION ---------- #
+
+cols = array(merged.columns)[1:]
+X = array(merged[cols][1:])
+Y = array(btc_up)
+X_partial = array(merged[:][:300])
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
+Y_partial = array(btc_up[:300])
+
+# ----------------- END DATA ORGANIZATION ---------- #
+
 # ----------------BEGIN MODEL TESTING -------------- #
 
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
 
 # Alternate model - 32-32-1, does not perform as well.
 model = Sequential()
@@ -246,30 +265,11 @@ comparison = [['persistence', persist_mae, persist_mse], ['ml5', ml5_mse, ml5_ma
 seed = 7
 numpy.random.seed(seed)
 
-cols = array(merged.columns)[1:]
-Y_partial = array(btc_up[:300])
-X_partial = array(merged[:][:300])
-
-Y = array(btc_up)
-X = array(merged[cols][1:])
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
-
 estimator = KerasClassifier(build_fn=baseline, nb_epoch=100, batch_size=5, verbose=0) kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
 results = cross_val_score(estimator, X, Y, cv=kfold)
 print(results.mean()*100, results.std()*100)
 
 # This predicts the price increase or decrease of btcOpen, in the form of a 1 or 0, respectively.
-
-        test_size = .33
-seed = 7
-cols = array(merged.columns)[1:]
-Y_partial = array(btc_up[:300])
-X_partial = array(merged[:][:300])
-
-Y = array(btc_up)
-X = array(merged[cols][1:])
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
-
 
 model = Sequential()
 model.add(layers.Dense(64, activation='tanh', input_shape=(X_train.shape[1],)))
@@ -285,14 +285,6 @@ print(accuracy_score(Y_test, predictions))
 
         test_size = .33
 seed = 7
-cols = array(merged.columns)[1:]
-Y_partial = array(btc_up[:300])
-X_partial = array(merged[:][:300])
-
-Y = array(btc_up)
-X = array(merged[cols][1:])
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
-
 
 model = SVC()
 kfold = KFold(n_splits=6, random_state=7)
@@ -305,6 +297,27 @@ accuracy = accuracy_score(Y_test, predictions)
 
 print('Predictions for given dates:', predictions)
 execfile('import.py')
+
+models = []
+models.append(('LR', LogisticRegression()))
+models.append(('CART', DecisionTreeClassifier()))
+models.append(('NB', GaussianNB()))
+models.append(('SVM', SVC()))
+results = []
+names = []
+scoring = 'accuracy'
+
+# This runs model tests on all the coins. If mean accuracy is greater than .6, it prints the model and coin. 
+for name, model in models:
+    kfold = KFold(n_splits=10, random_state=7)
+    for coin_predicted in y_df.columns:
+        cv_results = cross_val_score(model, X, y_df[coin_predicted], cv=kfold, scoring=scoring)
+        results.append(cv_results)
+        names.append(name)
+        msg = "Accuracy of %s for %s: %f (+/- %0.2f)" % (name, coin_predicted, cv_results.mean(), cv_results.std() * 2)
+        if cv_results.mean() > .6:
+            print(msg)
+
 # ------------------END MODEL TESTING -------------- #
 
 
@@ -337,15 +350,6 @@ ETH = purchase('eth', 250, 1)
 LTC = purchase('ltc', 250, 1)
 MON = purchase('mon', 250, 1)
 
-# Converting between coins
-def convert(coin1, amount1, coin2, day):
-    daily_prices = return_prices(day)
-    ratio = daily_prices[coin1]/daily_prices[coin2]
-    converted = amount1 * ratio
-    return converted
-
-def predict_ratios(day):
-
 # Ratio analysis will look like this: BTC_LTC = 1
 # Ratios will be an array?
 # [['BTC_LTC', 1]
@@ -362,27 +366,3 @@ def predict_ratios(day):
 # ----------------- END TRADING ------------------ #
 
 
-models = []
-models.append(('LR', LogisticRegression()))
-models.append(('CART', DecisionTreeClassifier()))
-models.append(('NB', GaussianNB()))
-models.append(('SVM', SVC()))
-results = []
-names = []
-scoring = 'accuracy'
-
-# This runs model tests on all the coins. If mean accuracy is greater than .6, it prints the model and coin. 
-for name, model in models:
-    kfold = KFold(n_splits=10, random_state=7)
-    for coin_predicted in y_df.columns:
-        cv_results = cross_val_score(model, X, y_df[coin_predicted], cv=kfold, scoring=scoring)
-        results.append(cv_results)
-        names.append(name)
-        msg = "Accuracy of %s for %s: %f (+/- %0.2f)" % (name, coin_predicted, cv_results.mean(), cv_results.std() * 2)
-        if cv_results.mean() > .6:
-            print(msg)
-
-execfile('import.py')
-
-
-print 'y_df contains predicted increases for coins'
