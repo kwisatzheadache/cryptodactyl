@@ -31,6 +31,7 @@ import numpy
 import pandas
 
 # ----------------- BEGIN FUNCTIONS ---------------# 
+# Creates a df with columns [T, t-1, t-2, ... t-window]
 def lag(variable, window):
     df1 = DataFrame(variable)
     for i in range(window):
@@ -43,6 +44,7 @@ def lag(variable, window):
     df1.columns = columns
     return df1.iloc[window:]
 
+# Simplest prediction model. Predicts T will be equal to T-1
 def persist(x):
     xy = lag(x, 1)
     col = xy.columns
@@ -56,19 +58,14 @@ def persist(x):
     mse = sum(err*err for err in error)/len(error)
     return (mae, mse)
 
+# Remove commas
 def no_comma(column):
     new = []
     for i in range(len(column)):
         new.append(column[i].replace(',', ''))
     return new
 
-def baseline():
-    model = Sequential()
-    model.add(Dense(60, input_dim=42, kernel_initializer='normal', activation='relu'))
-    model.add(Dense(1, kernel_initializer='normal', activation='sigmoid'))
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    return model
-
+# Finds the prices of coins at close given the day.
 def return_prices(day):
     btc = merged.loc[day, 'btcClose']
     ltc = merged.loc[day, 'ltcClose']
@@ -77,6 +74,18 @@ def return_prices(day):
     return {
         'btc': btc, 'ltc': ltc, 'eth': eth, 'mon': mon
     }
+
+# Takes the given dataset and column. Outputs whether value at T is greater or lesser than value at T-1
+def make_y(dataset, coin):
+    coin_up = []
+    lookback = lag(dataset[coin], 1)
+    cols = lookback.columns
+    for i in range(len(lookback)):
+        if lookback[cols[0]].iloc[i] < lookback[cols[1]].iloc[i]:
+            coin_up.append(0)
+        else:
+            coin_up.append(1)
+    return coin_up
 
 # Receive purchase call and return coin amount
 def purchase(coin, dollars, day):
@@ -116,7 +125,6 @@ for coin in coin_list:
 for i in range(len(coin_list)):
     coin_list[i] = coin_list[i][0:min(size)]
 
-
 # Combine coins into one large df
 merged = reduce(lambda left,right: merge(left,right,on='Date'), coin_list)
 merged['counter'] = range(len(merged))
@@ -125,8 +133,6 @@ cols.insert(0, cols.pop(cols.index('counter')))
 merged = merged[cols]
 
 # Some of the columns have a number with commas... remove them.
-
-
 for column in merged.columns:
     if 'Volume' in column:
         merged[column] = no_comma(merged[column])
@@ -135,7 +141,90 @@ for column in merged.columns:
     else:
         continue
 
-print('Merged contains data for 7 coins')
+# -------- END IMPORTING AND ARRANGING DATA ---------#
+
+
+# ------------- BEGIN CREATING FEATURES -------------#
+
+
+with_ratios = DataFrame(merged)
+ratios = [('btc_ltc', btc_ltc), ('btc_eth', btc_eth), ('btc_mon', btc_mon), ('ltc_eth', ltc_eth), ('ltc_mon', ltc_mon), ('eth_mon', eth_mon)]
+for name, data in ratios:
+    with_ratios[name] = data
+# with_ratios['btc_ltc', 'btc_eth', 'btc_mon', 'ltc_eth', 'ltc_mon', 'eth_mon'] = [btc_ltc, btc_eth, btc_mon, ltc_eth, ltc_mon, eth_mon]
+
+cols = array(merged.columns)[1:]
+X = array(merged[cols][1:])
+#Y is selected from the columns of y_df - a df with derived in y_coins.py
+
+# ------------- END CREATING FEATURES ---------------#
+
+
+# ------------- BEGIN MAKING Y-SET ------------------#
+
+# Creating variable to track ratios: btc:ltc, ltc:eth, btc:eth, etc. Questions - do I take an average of the ratio? A rolling average? Try to predict change in average, or just increase/decrease in ratio.
+# coin ratios
+
+btc_up = []
+lookback = lag(merged['btcClose'], 1)
+
+for i in range(len(lookback)):
+    if lookback['btcClose'].iloc[i] < lookback['btcClose t - 1'].iloc[i]:
+        btc_up.append(0)
+    else:
+        btc_up.append(1)
+
+
+############
+
+# Not entirely sure how I was going to use this. "If today's value is less than yesterday's y_list[i] = 0, else 1." That's the idea of it. 
+y_list = []
+for i in merged.columns:
+    if 'High' in i:
+        y_list.append(i)
+    if 'Open' in i:
+        y_list.append(i)
+    if 'Close' in i:
+        y_list.append(i)
+    if 'Low' in i:
+        y_list.append(i)
+    else:
+        continue
+
+y_df = DataFrame()
+for i in y_list:
+    y_df[i] = make_y(merged, i)
+
+############
+
+btc_ltc = []
+for i in range(len(merged)):
+    btc_ltc.append(merged['btcClose'][i]/merged['ltcClose'][i])
+
+btc_eth = []
+for i in range(len(merged)):
+    btc_eth.append(merged['btcClose'][i]/merged['ethClose'][i])
+
+btc_mon = []
+for i in range(len(merged)):
+    btc_mon.append(merged['btcClose'][i]/merged['moneroClose'][i])
+
+ltc_eth = []
+for i in range(len(merged)):
+    ltc_eth.append(merged['ltcClose'][i]/merged['ethClose'][i])
+
+ltc_mon = []
+for i in range(len(merged)):
+    ltc_mon.append(merged['ltcClose'][i]/merged['moneroClose'][i])
+
+eth_mon = []
+for i in range(len(merged)):
+    eth_mon.append(merged['ethClose'][i]/merged['moneroClose'][i])
+
+# ------------- END MAKING Y-SET ------------------- #
+
+# ----------------BEGIN MODEL TESTING -------------- #
+
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
 
@@ -165,30 +254,11 @@ Y = array(btc_up)
 X = array(merged[cols][1:])
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
 
-btc_up = []
-lookback = lag(merged['btcClose'], 1)
-
-for i in range(len(lookback)):
-    if lookback['btcClose'].iloc[i] < lookback['btcClose t - 1'].iloc[i]:
-        btc_up.append(0)
-    else:
-        btc_up.append(1)
-
-estimator = KerasClassifier(build_fn=baseline, nb_epoch=100, batch_size=5, verbose=0)
-kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
+estimator = KerasClassifier(build_fn=baseline, nb_epoch=100, batch_size=5, verbose=0) kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
 results = cross_val_score(estimator, X, Y, cv=kfold)
 print(results.mean()*100, results.std()*100)
 
 # This predicts the price increase or decrease of btcOpen, in the form of a 1 or 0, respectively.
-
-btc_up = []
-lookback = lag(merged['btcClose'], 1)
-
-for i in range(len(lookback)):
-    if lookback['btcClose'].iloc[i] < lookback['btcClose t - 1'].iloc[i]:
-        btc_up.append(0)
-    else:
-        btc_up.append(1)
 
         test_size = .33
 seed = 7
@@ -213,18 +283,6 @@ ml5_mse, ml5_mae = model.evaluate(X_test, Y_test)
 predictions = model.predict(X_test)
 print(accuracy_score(Y_test, predictions))
 
-
-execfile('import.py')
-
-btc_up = []
-lookback = lag(merged['btcClose'], 1)
-
-for i in range(len(lookback)):
-    if lookback['btcClose'].iloc[i] < lookback['btcClose t - 1'].iloc[i]:
-        btc_up.append(0)
-    else:
-        btc_up.append(1)
-
         test_size = .33
 seed = 7
 cols = array(merged.columns)[1:]
@@ -247,6 +305,10 @@ accuracy = accuracy_score(Y_test, predictions)
 
 print('Predictions for given dates:', predictions)
 execfile('import.py')
+# ------------------END MODEL TESTING -------------- #
+
+
+# --------------------- BEGIN TRADING -------------- #
 
 # Start with $1000 in four coins = monero, bitcoin, litecoin, and ethereum.
 # Based on the prediction of the ratio analyses, trade between the four coins.
@@ -297,61 +359,8 @@ def predict_ratios(day):
 # holdings = [BTC, ETH, LTC, MON]
 # def trade(ratios, monies):
 
+# ----------------- END TRADING ------------------ #
 
-# Feature Engineering
-
-# Creating variable to track ratios: btc:ltc, ltc:eth, btc:eth, etc. Questions - do I take an average of the ratio? A rolling average? Try to predict change in average, or just increase/decrease in ratio.
-
-# Predictor of which coin has greatest rise/fall.
-from matplotlib import pyplot
-
-# coin ratios
-
-btc_ltc = []
-for i in range(len(merged)):
-    btc_ltc.append(merged['btcClose'][i]/merged['ltcClose'][i])
-
-btc_eth = []
-for i in range(len(merged)):
-    btc_eth.append(merged['btcClose'][i]/merged['ethClose'][i])
-
-btc_mon = []
-for i in range(len(merged)):
-    btc_mon.append(merged['btcClose'][i]/merged['moneroClose'][i])
-
-ltc_eth = []
-for i in range(len(merged)):
-    ltc_eth.append(merged['ltcClose'][i]/merged['ethClose'][i])
-
-ltc_mon = []
-for i in range(len(merged)):
-    ltc_mon.append(merged['ltcClose'][i]/merged['moneroClose'][i])
-
-eth_mon = []
-for i in range(len(merged)):
-    eth_mon.append(merged['ethClose'][i]/merged['moneroClose'][i])
-
-
-# pyplot.plot(btc_ltc)
-# pyplot.plot(btc_eth)
-# pyplot.plot(btc_mon)
-# pyplot.plot(ltc_eth)
-# pyplot.plot(ltc_mon)
-# pyplot.plot(eth_mon)
-# pyplot.show()
-
-execfile('import.py')
-execfile('y_coins.py')
-
-with_ratios = DataFrame(merged)
-ratios = [('btc_ltc', btc_ltc), ('btc_eth', btc_eth), ('btc_mon', btc_mon), ('ltc_eth', ltc_eth), ('ltc_mon', ltc_mon), ('eth_mon', eth_mon)]
-for name, data in ratios:
-    with_ratios[name] = data
-# with_ratios['btc_ltc', 'btc_eth', 'btc_mon', 'ltc_eth', 'ltc_mon', 'eth_mon'] = [btc_ltc, btc_eth, btc_mon, ltc_eth, ltc_mon, eth_mon]
-
-cols = array(merged.columns)[1:]
-X = array(merged[cols][1:])
-#Y is selected from the columns of y_df - a df with derived in y_coins.py
 
 models = []
 models.append(('LR', LogisticRegression()))
@@ -374,36 +383,6 @@ for name, model in models:
             print(msg)
 
 execfile('import.py')
-
-# build model to predict coin ratios. 
-
-def make_y(dataset, coin):
-    coin_up = []
-    lookback = lag(dataset[coin], 1)
-    cols = lookback.columns
-    for i in range(len(lookback)):
-        if lookback[cols[0]].iloc[i] < lookback[cols[1]].iloc[i]:
-            coin_up.append(0)
-        else:
-            coin_up.append(1)
-    return coin_up
-
-y_list = []
-for i in merged.columns:
-    if 'High' in i:
-        y_list.append(i)
-    if 'Open' in i:
-        y_list.append(i)
-    if 'Close' in i:
-        y_list.append(i)
-    if 'Low' in i:
-        y_list.append(i)
-    else:
-        continue
-
-y_df = DataFrame()
-for i in y_list:
-    y_df[i] = make_y(merged, i)
 
 
 print 'y_df contains predicted increases for coins'
