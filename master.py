@@ -244,6 +244,8 @@ Y_partial = array(btc_up[:300])
 model = SVC()
 kfold = KFold(n_splits=6, random_state=7)
 cv_results = cross_val_score(model, X_train, Y_train, cv=kfold, scoring='accuracy')
+
+print('SVC model has been fit to data. Predictions made with mean accuracy, std accuracy:'
 print(cv_results.mean(), cv_results.std())
 
 model.fit(X_train, Y_train)
@@ -319,5 +321,4 @@ MON = purchase('mon', 250, 1)
 # def trade(ratios, monies):
 
 # ----------------- END TRADING ------------------ #
-
 
