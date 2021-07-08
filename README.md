@@ -1,28 +1,43 @@
 ## Synopsis
+High frequency trading. But not the way that FinTech companies are doing - thousands of trades per hour, dependent on high-speed connection and execution. Rather, we're trading on lower-frequency volatility, in smaller dollar amounts.
 
-Development of neural nets to predict market volatility in cryptocurrencies.
+Currently unclear whether it will be strictly stocks, coins, or a mix of both. 
+
+Multiple parts:
+
+1. API to scrape and collate data. Store in database. Thinking Elixir/MySQL, running on raspberry pi.
+1. Analysis and simulation. Things to consider:
+11. First layer: modeling single good.
+11. Second layer: multiple goods.
+11. Third layer: mixing trading strategies.
+11. Sampling frequency.
+11. Return requirements and stop losses.
+
 
 ## Code Example
+None yet.
 
-`python master.py` imports data from 7 cryptocurrencies and uses Support Vector Classification to  fit an NN model to the data. The model can the be used to predict whether the price of bitcoin for a given tomorrow will be higher or lower than the given today.
 
 
 ## Motivation
+$$$$$$$$$$$$$$$$
 
-Why do we do anything in life?
 
 ## Notes
 
-Current dataset is in reverse chronological order. Thinking about reversing it so that day one is in the past, rather than the most recent day...
 
 ## Next Steps
+1. MySQL Server
+1. Elixir API
+11. Grab multiple tickets, store in db.
+11. Run on Raspberry pi
+1. Modeling and simulation. Probably in Python for ease and speed.
 
-Automate collection of coin data.
-Analyze other coins.
-Address seasonality and general trend of data.
-Increase frequency of sampling to hourly. 
+
+
 
 ## Tests
+None yet.
 
 
 ## License
