@@ -34,6 +34,12 @@ $$$$$$$$$$$$$$$$
 1. Modeling and simulation. Probably in Python for ease and speed.
 
 
+## Requirements
+1. Elixir
+2. Postgres
+3. Phoenix?
+4. Python3
+5. Node.js (for phoenix?)
 
 
 ## Tests
