@@ -1,18 +1,16 @@
 import pickle
-from dotenv import load_dotenv
 import os
-from coinbase.wallet.client import Client
 import mariadb
+import time
+from coinbase.wallet.client import Client
+from dotenv import load_dotenv
 from datetime import datetime
 
-with open('coin_dictionary.p', 'rb') as f:
-    converter_dictionary = pickle.load(f)
-
-query = 'INSERT INTO entry (coin, value, time) VALUES (?, ?, ?)'
-
 load_dotenv()
-coinbase_key = os.environ.get('COINBASE_KEY')
-coinbase_secret = os.environ.get('COINBASE_SECRET')
+COINBASE_KEY = os.environ.get('COINBASE_KEY')
+COINBASE_SECRET = os.environ.get('COINBASE_SECRET')
+QUERY = 'INSERT INTO entry (coin, value, time) VALUES (?, ?, ?)'
+
 try:
     connection = mariadb.connect(user='cryptodactyl',
                                 database='cryptodactyl',
@@ -20,20 +18,31 @@ try:
                                 host='cryptodactyl.cqisjzaosajb.us-west-1.rds.amazonaws.com',
                                 port=3306)
     cursor = connection.cursor()
+    client = Client(COINBASE_KEY, COINBASE_SECRET)
 except Exception as e:
     print(e)
     print("DB connection isn't working. Are you remote or actually on the pi?")
 
-data = []
-if not coinbase_key:
-    print("hey, there's no keey here")
-else:
-    print("well, guess that worked so far.")
 
-    count = 0
-    client = Client(coinbase_key, coinbase_secret)
+count = 0
+while count < 600:
+    if count % 10 == 0:
+        # Not sure if connection or cursor is going to cause issues, so I'll just reload it every 10 seconds.
+        try:
+            connection = mariadb.connect(user='cryptodactyl',
+                                        database='cryptodactyl',
+                                        password='asdqweW2',
+                                        host='cryptodactyl.cqisjzaosajb.us-west-1.rds.amazonaws.com',
+                                        port=3306)
+            cursor = connection.cursor()
+            client = Client(COINBASE_KEY, COINBASE_SECRET)
+        except Exception as e:
+            print(e)
+            print("DB connection isn't working. Are you remote or actually on the pi?")
+
+    data = []
     now = datetime.now()
-    time = now.strftime("%Y-%m-%d %H:%M:%S")
+    curr_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
     rates = client.get_exchange_rates()
     exchange_rates = rates['rates']
@@ -46,13 +55,13 @@ else:
             try:
                 rate = 1/float(exchange_rates[coin])
                 print("price of {} is ${}".format(coin, rate))
-                data.append([coin, rate, time])
+                data.append([coin, rate, curr_time])
                 print("added to DB")
             except Exception as e:
                 print(e)
 
     try:
-        cursor.executemany(query, data)
+        cursor.executemany(QUERY, data)
         connection.commit()
     except Exception as e:
         print(e)
@@ -60,4 +69,8 @@ else:
     diff = later - now
     print("op time: {}".format(diff))
     print(len(rates['rates']))
+    microdiff = diff.microseconds/1000000
+    if microdiff >= 1:
+        microdiff = 0
+    time.sleep(1-microdiff)
     count += 1
