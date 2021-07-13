@@ -27,19 +27,20 @@ $$$$$$$$$$$$$$$$
 
 
 ## Next Steps
-1. MySQL Server
-1. Elixir API
+`sudo apt install mariadb-server-10.3`
+1. mariaDB server
+Create database "cryptodactyl"
+create table "ticker" with columns: `id, name, value, timestamp, source`
+1. simple API calls with python `requests`
 11. Grab multiple tickets, store in db.
 11. Run on Raspberry pi
 1. Modeling and simulation. Probably in Python for ease and speed.
 
 
 ## Requirements
-1. Elixir
-2. Postgres
-3. Phoenix?
-4. Python3
-5. Node.js (for phoenix?)
+1. python requirements in requirements.txt. Install with `pip3 install -r requirements.txt`
+1. mariadb. Install for raspbian not done yet.
+
 
 
 ## Tests
