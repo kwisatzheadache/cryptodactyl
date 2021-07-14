@@ -31,7 +31,7 @@ while count < 600:
         try:
             connection = mariadb.connect(user='cryptodactyl',
                                         database='cryptodactyl',
-                                        password='asdqweW2',
+                                        password='cryptodactyl',
                                         host='cryptodactyl.cqisjzaosajb.us-west-1.rds.amazonaws.com',
                                         port=3306)
             cursor = connection.cursor()
