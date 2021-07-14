@@ -7,11 +7,11 @@ Multiple parts:
 
 1. API to scrape and collate data. Store in database. Thinking Elixir/MySQL, running on raspberry pi.
 1. Analysis and simulation. Things to consider:
-11. First layer: modeling single good.
-11. Second layer: multiple goods.
-11. Third layer: mixing trading strategies.
-11. Sampling frequency.
-11. Return requirements and stop losses.
+    1. First layer: modeling single good.
+    1. Second layer: multiple goods.
+    1. Third layer: mixing trading strategies.
+    1. Sampling frequency.
+    1. Return requirements and stop losses.
 
 
 ## Code Example
@@ -32,8 +32,8 @@ $$$$$$$$$$$$$$$$
 Create database "cryptodactyl"
 create table "ticker" with columns: `id, name, value, timestamp, source`
 1. simple API calls with python `requests`
-11. Grab multiple tickets, store in db.
-11. Run on Raspberry pi
+    1. Grab multiple tickets, store in db.
+    1. Run on Raspberry pi
 1. Modeling and simulation. Probably in Python for ease and speed.
 
 
