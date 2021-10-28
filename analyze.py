@@ -1,4 +1,4 @@
-
+import math
 # Hello, Michael.
 
 # Outline the steps:
@@ -13,6 +13,8 @@
 BUY = 1
 SELL = -1
 HOLD = 0
+HAVE_COINS = 1
+HAVE_NO_COINS = 0
 
 def get_data(coin_id):
     data_vector = []
@@ -68,3 +70,43 @@ def repeating_direction(snippet):
         return BUY
     else:
         return HOLD
+
+def trade_over_entire_series(price_vector, starting_amount=1, window_size=10, sampling_rate=1, coin_id="BTC", decision_method="Default"):
+    """
+    Start with <starting_amount>, at every window, make a decision to buy, sell, or hold.
+    """
+    current_cash_value = starting_amount * price_vector[window_size]
+    starting_cash_value = starting_amount * price_vector[0]
+    ending_cash_value = starting_amount * price_vector[-1]
+
+    holding_state = HAVE_NO_COINS
+    holding_amount = 0
+    total_windows = math.floor(len(price_vector)/window_size)
+    for window in range(total_windows):
+        start = window * window_size
+        end = (window + 1) * (window_size-1)
+        snippet = price_vector[start:end]
+        current_price = price_vector[end]
+        decision = make_decision(snippet)
+        # Have no holdings, only cash, so we're looking to buy
+        if decision == BUY and holding_state == HAVE_NO_COINS:
+            # We "buy"
+            holding_amount = current_cash_value / current_price
+        elif decision == SELL and holding_state == HAVE_COINS:
+            current_cash_value = holding_amount * current_price
+        else:
+            pass
+    return (starting_cash_value, ending_cash_value, current_cash_value)
+
+
+def convert_queryresult_to_price_vector(query_result):
+    """
+    MariaDB query returns a list of tuples:
+    [(coin_id, value, time),
+     (coin_id, value, time),
+     ...
+    ]
+    This fetches the value column.
+    """
+    zipped = zip(query_result)
+    return zipped(1)

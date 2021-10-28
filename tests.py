@@ -21,4 +21,10 @@ class Testing(TestCase):
         decision = analyze.repeating_direction(neither)
         self.assertEqual(decision, analyze.HOLD)
 
+    def test_trade_over_entire_series(self):
+        price_vector = list(range(5000))
+        start, end, current = analyze.trade_over_entire_series(price_vector)
+        print(start, end, current)
+        self.assertTrue(True)
+
 
