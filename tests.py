@@ -25,6 +25,8 @@ class Testing(TestCase):
         price_vector = list(range(5000))
         start, end, current = analyze.trade_over_entire_series(price_vector)
         print(start, end, current)
-        self.assertTrue(True)
+        self.assertEqual(start, 0)
+        self.assertEqual(end, 4999)
+        self.assertEqual((current<end), 1)
 
 
