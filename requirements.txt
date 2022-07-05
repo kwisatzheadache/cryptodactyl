@@ -10,7 +10,7 @@ coinbase==2.1.0
 cryptography==3.4.7
 idna==2.10
 multidict==5.1.0
-pycares==4.0.0
+pycares==4.2.0
 pycparser==2.20
 pycryptodome==3.10.1
 python-dotenv==0.18.0
@@ -35,7 +35,7 @@ multidict==5.1.0
 packaging==21.0
 pluggy==1.0.0
 py==1.10.0
-pycares==4.0.0
+pycares==4.2.0
 pycparser==2.20
 pycryptodome==3.10.1
 pyparsing==3.0.3
